@@ -58,10 +58,20 @@ App = {
     const election = await $.getJSON('Election.json')
     App.contracts.Election = TruffleContract(election)
     App.contracts.Election.setProvider(App.web3Provider)
-    
+
     // Hydrate the smart contract with values from the blockchain
     App.election = await App.contracts.Election.deployed()
+    App.listenForEvents();
   }, 
+
+  listenForEvents: function() {
+    const evt = App.election.votedEvent();
+    evt.watch(function(error, result) {
+      console.log("event triggered", event)
+      // Reload when a new vote is recorded
+      App.render();
+    })
+  },
 
   render: async() => {
 
