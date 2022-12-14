@@ -52,7 +52,7 @@ App = {
   //   console.log(account);
   //   // App.account = await account[0];
   //   // console.log(App.account);
-  // },
+  // }, 
 
   loadContract: async() => {
     const election = await $.getJSON('Election.json')
@@ -90,6 +90,9 @@ App = {
     var candidatesResults = $("#candidatesResults")
     candidatesResults.empty()
 
+    var candidatesSelect = $('#candidatesSelect');
+    candidatesSelect.empty()
+
     // Render out each task with a new task template
     for (var i = 1; i <= candidatesCount; i++) {
         // Fetch the task data from the blockchain
@@ -101,7 +104,27 @@ App = {
         // Render candidate Result
         var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
         candidatesResults.append(candidateTemplate);
+
+        // Render candidate ballot option
+        var candidateOption = "<option value='" + id + "'>" + name + "</ option>"
+        candidatesSelect.append(candidateOption);
     }
+
+    const hasVoted = await App.election.voters(App.account);
+
+    if (hasVoted) {
+      $('form').hide();
+    }
+    App.setLoading(false);
+  },
+
+  castVote: async() => {
+    var candidateId = $('#candidatesSelect').val();
+    console.log(App.account[0]);
+    App.setLoading(true);
+    await App.election.vote(candidateId, {from: App.account[0]});
+    App.setLoading(false);
+    
   },
 
   setLoading: (boolean) => {
